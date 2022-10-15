@@ -1,3 +1,4 @@
+from struct import pack
 import sys
 import socket
 
@@ -18,11 +19,41 @@ def get_next_word_packet(s):
 
     Returns None if there are no more words, i.e. the server has hung
     up.
+
+        while True:
+        if buffer starts with a complete packet
+            extract the packet data
+            strip the packet data off the front of the buffer
+            return the packet data
+
+        receive more data
+
+        if amount of data received is zero bytes
+            return connection closed indicator
+
+        append received data onto the buffer
     """
 
     global packet_buffer
+    next_word = b''
 
     # TODO -- Write me!
+
+    while True:
+        # if i have complete packet then slice
+        if len(packet_buffer) >= 2:
+            word_length = int.from_bytes(packet_buffer[:2], "big")
+            packet_size = word_length + 2
+            if packet_size <= len(packet_buffer):
+                packet = packet_buffer[:packet_size]
+                packet_buffer = packet_buffer[packet_size:]
+                return packet 
+        chunk = s.recv(5)
+        if len(chunk) == 0:
+            return None
+        packet_buffer += chunk
+        
+        
 
 
 def extract_word(word_packet):
@@ -36,6 +67,8 @@ def extract_word(word_packet):
     """
 
     # TODO -- Write me!
+
+    return word_packet[2:].decode()
 
 # Do not modify:
 
